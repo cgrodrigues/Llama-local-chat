@@ -1,4 +1,5 @@
-import requests
+# import requests
+import ollama
 import streamlit as st
 
 # Local model server address
@@ -29,30 +30,46 @@ def main():
                 st.markdown(prompt)
 
         # Prepare the data to send to your local model
-        data = {
-            "model": "llama3",
-            "messages": [
-                {
-                    "role": m["role"],
-                    "content": m["content"]
-                } for m in st.session_state.messages
-            ],
-            "stream": False
-        }
-        
+        # data = {
+        #     "model": "llama3",
+        #     "messages": [
+        #         {
+        #             "role": m["role"],
+        #             "content": m["content"]
+        #         } for m in st.session_state.messages
+        #     ],
+        #     "stream": False
+        # }
 
         # Send a post request to your model server
-        response = requests.post(ollama_url, json=data)
+        # response = requests.post(ollama_url, json=data)
+        
+        # if response.status_code == 200:
+        #     # Assuming the response includes the generated text directly
+        #     generated_text = response.json()['message']['content']
+        #     st.session_state.messages.append({"role": "assistant", "content": generated_text})
+        #     with st.chat_message("assistant"):
+        #         st.markdown(generated_text)
+        # else:
+        #     st.error("Failed to generate response from the model.")
+
+        # Prepare the data to send to your local model
+        data =  [
+                    {
+                        "role": m["role"],
+                        "content": m["content"]
+                    } for m in st.session_state.messages
+                ]
+        # Send a post request to your model server
+        response = ollama.chat(model='llama3', messages=data)
+
+        generated_text = response['message']['content']
+        st.session_state.messages.append({"role": "assistant", "content": generated_text})
+        with st.chat_message("assistant"):
+            st.markdown(generated_text)
     
 
-        if response.status_code == 200:
-            # Assuming the response includes the generated text directly
-            generated_text = response.json()['message']['content']
-            st.session_state.messages.append({"role": "assistant", "content": generated_text})
-            with st.chat_message("assistant"):
-                st.markdown(generated_text)
-        else:
-            st.error("Failed to generate response from the model.")
+        
      
 
 # Put the LLama 3 name in the page
